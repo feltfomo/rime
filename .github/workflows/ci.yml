@@ -19,7 +19,8 @@ jobs:
       - uses: cachix/cachix-action@v16
         with:
           name: devenv
-      - uses: cachix/devenv-action@v1
+      - name: Install devenv 2.2.2
+        run: nix profile install github:cachix/devenv/v2.2.2
       - run: devenv test
       - if: always()
         uses: actions/upload-artifact@v4
@@ -39,6 +40,7 @@ jobs:
       - uses: cachix/cachix-action@v16
         with:
           name: devenv
-      - uses: cachix/devenv-action@v1
+      - name: Install devenv 2.2.2
+        run: nix profile install github:cachix/devenv/v2.2.2
       - run: devenv tasks run audit:scheduled
       # sanitizer coverage starts when runtime code gives it a meaningful target
