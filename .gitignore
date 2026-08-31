@@ -1,0 +1,11 @@
+.devenv/
+.direnv/
+devenv.local.nix
+target/
+result
+result-*
+shell/shaders/generated/
+shell/proto/
+.pre-commit-config.yaml
+soak-logs/
+failure-artifacts/

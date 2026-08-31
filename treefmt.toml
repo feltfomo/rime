@@ -1,0 +1,43 @@
+[global]
+excludes = [
+  ".devenv/**",
+  ".direnv/**",
+  ".git/**",
+  ".pre-commit-config.yaml",
+  "failure-artifacts/**",
+  "result",
+  "result-*",
+  "shell/proto/**",
+  "shell/shaders/generated/**",
+  "soak-logs/**",
+  "target/**",
+]
+
+[formatter.rustfmt]
+command = "rustfmt"
+options = ["--edition", "2024"]
+includes = ["*.rs"]
+
+[formatter.nixfmt]
+command = "nixfmt"
+includes = ["*.nix"]
+
+[formatter.taplo]
+command = "taplo"
+options = ["format"]
+includes = ["*.toml"]
+
+[formatter.prettier]
+command = "prettier"
+options = ["--write"]
+includes = ["*.md", "*.yaml", "*.yml"]
+
+[formatter.qmlformat]
+command = "qmlformat"
+options = ["-i"]
+includes = ["*.qml"]
+
+[formatter.shader]
+command = "clang-format"
+options = ["-i"]
+includes = ["*.frag", "*.vert", "*.glsl"]

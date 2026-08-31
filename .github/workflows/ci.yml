@@ -1,0 +1,44 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: "23 4 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  gate:
+    if: github.event_name != 'schedule'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: cachix/install-nix-action@v31
+      - uses: cachix/cachix-action@v16
+        with:
+          name: devenv
+      - uses: cachix/devenv-action@v1
+      - run: devenv test
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gate-artifacts
+          path: |
+            soak-logs/
+            failure-artifacts/
+          if-no-files-found: ignore
+
+  scheduled-audit:
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: cachix/install-nix-action@v31
+      - uses: cachix/cachix-action@v16
+        with:
+          name: devenv
+      - uses: cachix/devenv-action@v1
+      - run: devenv tasks run audit:scheduled
+      # sanitizer coverage starts when runtime code gives it a meaningful target

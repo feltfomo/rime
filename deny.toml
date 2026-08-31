@@ -1,0 +1,18 @@
+[advisories]
+version = 2
+yanked = "deny"
+
+[licenses]
+version = 2
+# unlisted and unlicensed crates are denied by cargo-deny
+allow = ["MIT", "Apache-2.0"]
+
+[bans]
+multiple-versions = "deny"
+wildcards = "deny"
+
+[sources]
+unknown-registry = "deny"
+unknown-git = "deny"
+# dependencies must come from crates.io unless policy changes
+allow-registry = ["https://github.com/rust-lang/crates.io-index"]
