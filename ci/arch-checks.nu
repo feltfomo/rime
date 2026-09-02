@@ -54,6 +54,27 @@ def architecture-check [root: path] {
           $failures = ($failures | append $"($rel) uses banned rendering construct ($banned)")
         }
       }
+      if ($text | str contains "Quickshell.env") and $rel != "shell/safe.qml" {
+        $failures = ($failures | append $"($rel) reads process environment outside the safe view")
+      }
+    }
+
+    if $rel == "shell/safe.qml" {
+      for banned in ["Rectangle" "QtQuick.Controls" "Process" "FileView" "Socket" "DBus"] {
+        if ($text | str contains $banned) {
+          $failures = ($failures | append $"($rel) uses prohibited bootstrap construct ($banned)")
+        }
+      }
+      if not ($text | str contains 'Quickshell.env("RIME_CRASH_REASON")') {
+        $failures = ($failures | append "shell/safe.qml does not display the supervisor crash reason")
+      }
+      if not ($text | str contains "Qt.quit()") {
+        $failures = ($failures | append "shell/safe.qml does not expose the reload exit action")
+      }
+    }
+
+    if ($rel starts-with "crates/rime-protocol/") or ($rel starts-with "crates/rime-ipc/") or ($rel starts-with "shell/proto/") {
+      $failures = ($failures | append $"($rel) introduces protocol work before its owning phase")
     }
 
     if ($rel starts-with "shell/surfaces/") {
@@ -67,7 +88,7 @@ def architecture-check [root: path] {
       }
     }
 
-    # token definitions are the only source files allowed to carry literal colors
+    # hexadecimal colors belong in token definitions rather than other source files
     if not ($rel starts-with "shell/tokens/") and ($text =~ '(?i)#[0-9a-f]{3,8}\b') {
       $failures = ($failures | append $"($rel) contains a hex color outside the token layer")
     }
@@ -84,16 +105,47 @@ def architecture-check [root: path] {
   $failures
 }
 
-def main [--qml-only] {
+def protocol-prefix-probe [] {
+  let root = (^mktemp --directory | str trim)
+  let expected = [
+    "crates/rime-protocol/src/lib.rs"
+    "crates/rime-ipc/src/lib.rs"
+    "shell/proto/generated.qml"
+  ]
+  for rel in $expected {
+    let file = ($root | path join $rel)
+    mkdir ($file | path dirname)
+    "probe" | save $file
+  }
+  let detected = (architecture-check $root)
+  rm --recursive --force $root
+
+  mut failures = []
+  for rel in $expected {
+    if not ($detected | any {|failure| $failure | str starts-with $"($rel) introduces protocol work" }) {
+      $failures = ($failures | append $"protocol prefix probe missed ($rel)")
+    }
+  }
+  $failures
+}
+
+def main [--qml-only, --protocol-probe] {
   let root = (repo-root)
   let failures = if $qml_only {
     qml-check $root
+  } else if $protocol_probe {
+    protocol-prefix-probe
   } else {
-    architecture-check $root
+    (architecture-check $root) | append (protocol-prefix-probe)
   }
 
   if ($failures | is-not-empty) {
     $failures | each {|failure| print --stderr $failure }
     exit 1
+  }
+  if $protocol_probe {
+    print "protocol prefix probe rejected crates/rime-protocol/src/lib.rs"
+    print "protocol prefix probe rejected crates/rime-ipc/src/lib.rs"
+    print "protocol prefix probe rejected shell/proto/generated.qml"
   }
 }

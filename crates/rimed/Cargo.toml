@@ -5,5 +5,9 @@ edition.workspace = true
 license.workspace = true
 rust-version.workspace = true
 
+[dependencies]
+rime-supervise = { version = "0.1.0", path = "../rime-supervise" }
+tokio = { version = "1.47.1", default-features = false, features = ["rt"] }
+
 [lints]
 workspace = true

@@ -1,0 +1,11 @@
+[Unit]
+Description=Rime desktop shell
+PartOf=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=@RIMED@/bin/rimed
+Restart=on-failure
+
+[Install]
+WantedBy=graphical-session.target

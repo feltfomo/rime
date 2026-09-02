@@ -25,8 +25,7 @@
         }
       );
 
-      # these namespaces stay empty until their consumers are functional
-      homeManagerModules = { };
+      homeManagerModules.rime = import ./nix/hm-module.nix;
       checks = forAllSystems (_: { });
       apps = forAllSystems (_: { });
     };

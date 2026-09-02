@@ -1,5 +1,5 @@
 [workspace]
-members = ["crates/rimed", "crates/rimectl"]
+members = ["crates/rime-supervise", "crates/rimed", "crates/rimectl"]
 resolver = "2"
 
 [workspace.package]

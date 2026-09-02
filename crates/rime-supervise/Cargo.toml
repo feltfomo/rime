@@ -1,0 +1,24 @@
+[package]
+name = "rime-supervise"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+fs2 = "0.4.3"
+nix = { version = "0.30.1", default-features = false, features = [
+  "process",
+  "signal",
+  "user",
+] }
+tokio = { version = "1.47.1", default-features = false, features = [
+  "process",
+  "rt",
+  "signal",
+  "sync",
+  "time",
+] }
+
+[lints]
+workspace = true

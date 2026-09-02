@@ -1,5 +1,6 @@
 {
   config,
+  lib,
   pkgs,
   ...
 }:
@@ -56,6 +57,8 @@ in
 
   env.QSG_RENDER_LOOP = "threaded";
   env.RIME_DEV = "1";
+  env.RIME_QUICKSHELL = "${lib.getExe pkgs.quickshell}";
+  env.RIME_SHELL_DIR = "${root}/shell";
 
   scripts = {
     rime-run = {
@@ -63,8 +66,8 @@ in
       description = "build and run the available rime process";
     };
     rime-nest = {
-      exec = "devenv tasks run dev:nested";
-      description = "check nested verification availability";
+      exec = "${runNu "ci/soak.nu"} --nested";
+      description = "run the supervised shell in a nested compositor";
     };
     rime-fmt = {
       exec = treefmtCommand;
@@ -80,7 +83,7 @@ in
     };
     rime-soak = {
       exec = "devenv tasks run gate:soak";
-      description = "run the current zero-surface soak gate";
+      description = "run the supervised process soak gate";
     };
   };
 
@@ -169,7 +172,7 @@ in
       cwd = root;
     };
     "build:packages" = {
-      exec = "nix build .#rimed .#rimectl --no-link";
+      exec = "${runNu "ci/soak.nu"} --packages";
       cwd = root;
     };
     "gate:soak" = {
@@ -184,6 +187,10 @@ in
       "build:packages"
       "gate:soak"
     ];
+    "test:systemd" = {
+      exec = "${runNu "ci/soak.nu"} --systemd";
+      cwd = root;
+    };
     "audit:scheduled" = {
       exec = "cargo deny check && cargo machete";
       cwd = root;
